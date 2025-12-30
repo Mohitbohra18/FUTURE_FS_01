@@ -206,9 +206,8 @@ const PortfolioApp = () => {
   ];
   const { theme, toggleTheme } = useTheme();
   const activeId = useSectionObserver(sectionIds);
-  const subtitle = useTypingEffect(
-    "Software Engineer | AI/ML Enthusiast | Published Researcher"
-  );
+  
+  const subtitle = "Full-Stack Developer | AI/ML Enthusiast | Problem Solver";
   const scrollProgress = useScrollProgress();
   const cursorTrail = useCursorTrail(10);
   const [navOpen, setNavOpen] = useState(false);
@@ -260,7 +259,7 @@ const PortfolioApp = () => {
       color: "from-amber-400 to-orange-500"
     },
     {
-      title: "Started BTech in Computer Science",
+      title: "BTech in Computer Science",
       subtitle: "Began journey into software engineering and CS fundamentals",
       date: "2022",
       icon: BookOpen,
@@ -300,27 +299,6 @@ const PortfolioApp = () => {
       date: "2024",
       icon: Award,
       color: "from-lime-400 to-emerald-500"
-    },
-    {
-      title: "Conference Presentations",
-      subtitle: "Presented research at AUTOCOM and CYBERCOM conferences",
-      date: "2024",
-      icon: Mic2,
-      color: "from-cyan-400 to-blue-500"
-    },
-    {
-      title: "Current: Advanced Projects",
-      subtitle: "Building MANREGA system and AI interview preparation platform",
-      date: "2024 - Present",
-      icon: Rocket,
-      color: "from-violet-400 to-purple-500"
-    },
-    {
-      title: "Future: Production AI Systems",
-      subtitle: "Scaling ML solutions and building enterprise-grade applications",
-      date: "Next",
-      icon: Stars,
-      color: "from-fuchsia-400 to-pink-500"
     }
   ];
 
@@ -375,7 +353,7 @@ const PortfolioApp = () => {
     {
       id: 1,
       title: "Weather Forecast Website | Real-Time Climate Information Platform",
-      category: ["React, OpenWeather API,"],
+      category: ["Web Dev"],
       badge: "Frontend-focused",
       description:
         "Developed a responsive weather forecasting web application that provides real-time weather updates based on user location and city search.",
@@ -579,17 +557,86 @@ const PortfolioApp = () => {
     }
   ];
 
-  const projectCategories = ["All", "Web Dev", "AI/ML", "Backend", "Ongoing"];
+  // -------- FILTER CONFIGURATIONS (Bulletproof: labels can differ from values) --------
+  
+  // Skills filter config - maps display labels to actual data keys
+  // IMPORTANT: The 'value' field MUST exactly match keys in skillsData object
+  const skillFilterConfig = [
+    { label: "All", value: "All" },
+    { label: "Languages & Frameworks", value: "Languages & Frameworks" },
+    { label: "AI/ML & Data Science", value: "AI/ML & Data Science" },
+    { label: "Database & Tools", value: "Database & Tools" }
+  ];
 
-  const filteredProjects = useMemo(() => {
-    if (projectFilter === "All") return projects;
-    return projects.filter((p) => p.category.includes(projectFilter));
-  }, [projectFilter, projects]);
+  // Projects filter config - maps display labels to actual category values
+  // IMPORTANT: The 'value' field MUST exactly match values in projects[].category arrays
+  const projectFilterConfig = [
+    { label: "All", value: "All" },
+    { label: "Web Dev", value: "Web Dev" },
+    { label: "AI/ML", value: "AI/ML" },
+    { label: "Backend", value: "Backend" },
+    { label: "Compilers", value: "Compilers" },
+    { label: "Ongoing", value: "Ongoing" }
+  ];
 
-  const filteredAchievements = useMemo(() => {
-    if (achievementFilter === "All") return achievementItems;
-    return achievementItems.filter((a) => a.category === achievementFilter);
-  }, [achievementFilter, achievementItems]);
+  // Achievements filter config - maps display labels to actual category values
+  // IMPORTANT: The 'value' field MUST exactly match values in achievementItems[].category
+  const achievementFilterConfig = [
+    { label: "All", value: "All" },
+    { label: "Research", value: "Research" },
+    { label: "Leadership", value: "Leadership" },
+    { label: "Impact", value: "Impact" },
+    { label: "Learning", value: "Learning" }
+  ];
+
+  // Validation helper: ensures filter configs match actual data
+  // This runs in development to catch mismatches early
+  if (process.env.NODE_ENV === 'development') {
+    // Validate skills filters match skillsData keys
+    const skillKeys = Object.keys(skillsData);
+    skillFilterConfig.forEach(filter => {
+      if (filter.value !== "All" && !skillKeys.includes(filter.value)) {
+        console.warn(`⚠️ Skills filter "${filter.label}" has value "${filter.value}" that doesn't match any skillsData key!`);
+      }
+    });
+
+    // Validate project filters match project categories
+    const allProjectCategories = new Set();
+    projects.forEach(p => p.category.forEach(cat => allProjectCategories.add(cat)));
+    projectFilterConfig.forEach(filter => {
+      if (filter.value !== "All" && !allProjectCategories.has(filter.value)) {
+        console.warn(`⚠️ Project filter "${filter.label}" has value "${filter.value}" that doesn't match any project category!`);
+      }
+    });
+
+    // Validate achievement filters match achievement categories
+    const achievementCategories = new Set(achievementItems.map(a => a.category));
+    achievementFilterConfig.forEach(filter => {
+      if (filter.value !== "All" && !achievementCategories.has(filter.value)) {
+        console.warn(`⚠️ Achievement filter "${filter.label}" has value "${filter.value}" that doesn't match any achievement category!`);
+      }
+    });
+  }
+
+  // -------- FILTERED DATA (Using exact values from config) --------
+  // For Skills we filter inline in the JSX (see SKILLS section).
+  // For Projects and Achievements we compute filtered lists here.
+
+  const projectsForCurrentFilter = useMemo(
+    () =>
+      projects.filter(
+        (p) => projectFilter === "All" || p.category.includes(projectFilter)
+      ),
+    [projectFilter, projects]
+  );
+
+  const achievementsForCurrentFilter = useMemo(
+    () =>
+      achievementItems.filter(
+        (a) => achievementFilter === "All" || a.category === achievementFilter
+      ),
+    [achievementFilter, achievementItems]
+  );
 
 
   // -------- HANDLERS --------
@@ -987,7 +1034,7 @@ const PortfolioApp = () => {
                 className="max-w-xl text-sm md:text-base text-slate-700 dark:text-slate-200 mb-6"
                 variants={fadeUp}
               >
-               Results-driven Software Engineer and AI/ML enthusiast with proven expertise in full-stack development, machine learning, and cybersecurity. Published researcher with hands-on experience building scalable applications that solve real-world problems. Demonstrated leadership through technical presentations at national conferences and successful event management. Passionate about leveraging technology to create meaningful impact in agriculture, renewable energy, and automation domains.
+              Results-driven Software Engineer and AI/ML enthusiast with proven expertise in full-stack development, machine learning, and cybersecurity. Published researcher with hands-on experience building scalable applications that solve real-world problems. Demonstrated leadership through technical presentations at national conferences and successful event management. Passionate about leveraging technology to create meaningful impact in agriculture, renewable energy, and automation domains.
               </motion.p>
 
               <motion.p
@@ -1026,7 +1073,7 @@ const PortfolioApp = () => {
                   />
                 </button>
                 <a
-                  href="https://drive.google.com/file/d/1HqJjUacTKNW5BiZWb1x77ZTToaI4Sxgx/view?usp=sharing"
+                  href="https://drive.google.com/file/d/1eZ4qeh5qBC5AGRADPIDSwwH8O0wOXq4P/view?usp=sharing"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-[#FF6F61]/60 bg-white/60 dark:bg-black/40 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-100 shadow-sm hover:bg-[#FF6F61]/10 hover:border-[#FF6F61] transition-all focus-visible:ring-2 focus-visible:ring-[#FF6F61] outline-none"
@@ -1472,27 +1519,25 @@ const PortfolioApp = () => {
             viewport={{ once: true, amount: 0.2 }}
           >
             <div className="flex flex-wrap gap-2">
-              {["All", "Languages & Frameworks", "Database & Tools"].map(
-                (cat) => (
-                  <button
-                    type="button"
-                    key={cat}
-                    onClick={() => setSkillFilter(cat)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium border bg-white/70 dark:bg-black/40 transition-all hover:-translate-y-0.5 ${
-                      skillFilter === cat
-                        ? "border-[#FF6F61] text-[#1A1A1A] dark:text-black bg-gradient-to-r from-[#FF8E72] via-[#FF6F61] to-[#FFB4A2]"
-                        : "border-slate-300/60 dark:border-slate-700/70 text-slate-700 dark:text-slate-200"
-                    }`}
-                  >
-                    {cat === "All" ? (
-                      <LayoutGrid className="w-3.5 h-3.5" />
-                    ) : (
-                      <Filter className="w-3.5 h-3.5" />
-                    )}
-                    <span>{cat}</span>
-                  </button>
-                )
-              )}
+              {skillFilterConfig.map((filter) => (
+                <button
+                  type="button"
+                  key={filter.value}
+                  onClick={() => setSkillFilter(filter.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium border bg-white/70 dark:bg-black/40 transition-all hover:-translate-y-0.5 ${
+                    skillFilter === filter.value
+                      ? "border-[#FF6F61] text-[#1A1A1A] dark:text-black bg-gradient-to-r from-[#FF8E72] via-[#FF6F61] to-[#FFB4A2]"
+                      : "border-slate-300/60 dark:border-slate-700/70 text-slate-700 dark:text-slate-200"
+                  }`}
+                >
+                  {filter.value === "All" ? (
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  ) : (
+                    <Filter className="w-3.5 h-3.5" />
+                  )}
+                  <span>{filter.label}</span>
+                </button>
+              ))}
             </div>
             {/* Search */}
             <div className="relative w-full sm:w-60 md:w-72 mt-1 sm:mt-0">
@@ -1511,18 +1556,26 @@ const PortfolioApp = () => {
           <motion.div
             className="mt-6 grid md:grid-cols-2 gap-5"
             variants={staggerContainer}
-            initial="hidden"
+            initial={false} // avoid being stuck in hidden state
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
             {Object.entries(skillsData).map(([category, list]) => {
               const show =
                 skillFilter === "All" || skillFilter === category;
-              if (!show) return null;
 
               const filteredList = list.filter((s) =>
                 s.toLowerCase().includes(skillSearch.toLowerCase())
               );
+
+              // Debug log to see how many skills each block has
+              console.log("DEBUG skills block:", {
+                category,
+                show,
+                filteredListLen: filteredList.length
+              });
+
+              if (!show) return null;
 
               return (
                 <motion.div
@@ -1600,19 +1653,19 @@ const PortfolioApp = () => {
             viewport={{ once: true, amount: 0.2 }}
           >
             <div className="flex flex-wrap gap-2 text-xs">
-              {projectCategories.map((cat) => (
+              {projectFilterConfig.map((filter) => (
                 <button
                   type="button"
-                  key={cat}
-                  onClick={() => handleProjectFilterChange(cat)}
+                  key={filter.value}
+                  onClick={() => handleProjectFilterChange(filter.value)}
                   className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border backdrop-blur-sm transition-all hover:-translate-y-0.5 ${
-                    projectFilter === cat
+                    projectFilter === filter.value
                       ? "bg-gradient-to-r from-[#FF8E72] via-[#FF6F61] to-[#FFB4A2] text-black border-transparent shadow-[0_15px_40px_rgba(255,111,97,0.5)]"
                       : "bg-white/60 dark:bg-black/50 border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-200"
                   }`}
                 >
-                  <span>{cat}</span>
-                  {projectFilter === cat && (
+                  <span>{filter.label}</span>
+                  {projectFilter === filter.value && (
                     <motion.span
                       className="w-1.5 h-1.5 rounded-full bg-black/80"
                       layoutId="project-filter-dot"
@@ -1627,7 +1680,7 @@ const PortfolioApp = () => {
           <motion.div
             className="mt-7 grid md:grid-cols-2 gap-5"
             variants={staggerContainer}
-            initial="hidden"
+            initial={false} // avoid cards staying hidden if viewport trigger fails
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
@@ -1635,7 +1688,7 @@ const PortfolioApp = () => {
               ? [1, 2, 3, 4].map((i) => (
                   <SkeletonProjectCard key={i} />
                 ))
-              : filteredProjects.map((proj) => (
+              : projectsForCurrentFilter.map((proj) => (
                   <motion.article
                     key={proj.id}
                     className={`${glassClasses} rounded-3xl flex flex-col overflow-hidden group cursor-pointer`}
@@ -1759,27 +1812,19 @@ const PortfolioApp = () => {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {[
-              "All",
-              "Learning",
-              "Competitive",
-              "Hackathons",
-              "Academics",
-              "Leadership",
-              "Open Source"
-            ].map((cat) => (
+            {achievementFilterConfig.map((filter) => (
               <button
                 type="button"
-                key={cat}
-                onClick={() => setAchievementFilter(cat)}
+                key={filter.value}
+                onClick={() => setAchievementFilter(filter.value)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border backdrop-blur-sm transition-all hover:-translate-y-0.5 ${
-                  achievementFilter === cat
+                  achievementFilter === filter.value
                     ? "bg-gradient-to-r from-[#FF8E72] via-[#FF6F61] to-[#FFB4A2] text-black border-transparent shadow-[0_15px_40px_rgba(255,111,97,0.5)]"
                     : "bg-white/60 dark:bg-black/50 border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-200"
                 }`}
               >
                 <Stars className="w-3.5 h-3.5" />
-                <span>{cat}</span>
+                <span>{filter.label}</span>
               </button>
             ))}
           </motion.div>
@@ -1788,11 +1833,11 @@ const PortfolioApp = () => {
           <motion.div
             className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
             variants={staggerContainer}
-            initial="hidden"
+            initial={false} // avoid cards staying hidden if viewport trigger fails
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {filteredAchievements.map((a, i) => {
+            {achievementsForCurrentFilter.map((a, i) => {
               const Icon = a.icon;
               return (
                 <motion.div
@@ -1925,7 +1970,7 @@ const PortfolioApp = () => {
                       )}
                     </button>
                     <a
-                      href="https://drive.google.com/file/d/1HqJjUacTKNW5BiZWb1x77ZTToaI4Sxgx/view?usp=sharing"
+                      href="https://drive.google.com/file/d/1eZ4qeh5qBC5AGRADPIDSwwH8O0wOXq4P/view?usp=sharing"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-[0.75rem] md:text-xs px-3 py-1 rounded-full border border-slate-300/80 dark:border-slate-700/80 bg-white/70 dark:bg-black/60 text-slate-800 dark:text-slate-100 hover:border-[#FF6F61] hover:text-[#FF6F61] transition-colors"
@@ -2131,7 +2176,8 @@ const InterestCard = ({ icon: Icon, label, description }) => (
 
 const StatCard = ({ label, value, sub }) => (
   <motion.div
-    className="rounded-2xl bg-slate-900 text-slate-100 dark:bg.black/80 px-3 py-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.75)] flex flex-col"
+    className="rounded-2xl bg-slate-900 text-slate-100 dark:bg-black/80 
+ px-3 py-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.75)] flex flex-col"
     whileHover={{ y: -2, scale: 1.02 }}
   >
     <span className="text-[0.65rem] uppercase tracking-[0.16em] text-slate-400">
