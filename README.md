@@ -30,6 +30,8 @@ Then open the printed URL in your browser (by default `http://localhost:5173`).
 npm run build
 npm run preview
 ```
+## Deployed Live Project
+URL -- `https://future-fs-01-wine.vercel.app/`
 
 ## Notes
 
